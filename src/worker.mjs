@@ -1,5 +1,7 @@
 import { Buffer } from "node:buffer";
 
+var i = 0;
+
 export default {
   async fetch (request) {
     if (request.method === "OPTIONS") {
@@ -11,7 +13,16 @@ export default {
     };
     try {
       const auth = request.headers.get("Authorization");
-      const apiKey = auth?.split(" ")[1];
+      let apiKey = auth?.split(" ")[1];
+      if (!API_KEYS) {
+        console.log("API_KEYS 环境变量不存在或为空。");
+      } else {
+        console.log("API_KEYS 环境变量存在，值为:", API_KEYS);
+        let apiKeys = API_KEYS.split(",");
+        apiKey = apiKeys[i%apiKeys.length];
+        i++;
+        console.log("第二个 key:", apiKey);
+      }
       const assert = (success) => {
         if (!success) {
           throw new HttpError("The specified HTTP method is not allowed for the requested resource", 400);

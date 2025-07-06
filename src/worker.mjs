@@ -13,46 +13,37 @@ export default {
       const auth = request.headers.get("Authorization");
       let apiKey = auth?.split(" ")[1];
       const API_KEYS = Netlify.env.get("API_KEYS");
-      let retrycnt = 3;
-      let i = 0;
       let now = Date.now();
-      while(i < retrycnt){
-        if (!API_KEYS) {
-          console.log("API_KEYS 环境变量不存在或为空。");
-        } else {
-          console.log("API_KEYS 环境变量存在，值为:", API_KEYS);
-          let apiKeys = API_KEYS.split(",");
-          apiKey = apiKeys[(now+i) % apiKeys.length];
-          console.log("第二个 key:", apiKey);
+      if (!API_KEYS) {
+        console.log("API_KEYS 环境变量不存在或为空。");
+      } else {
+        console.log("API_KEYS 环境变量存在，值为:", API_KEYS);
+        let apiKeys = API_KEYS.split(",");
+        apiKey = apiKeys[(now+i) % apiKeys.length];
+        console.log("第二个 key:", apiKey);
+      }
+      const assert = (success) => {
+        if (!success) {
+          throw new HttpError("The specified HTTP method is not allowed for the requested resource", 400);
         }
-        const assert = (success) => {
-          if (!success) {
-            throw new HttpError("The specified HTTP method is not allowed for the requested resource", 400);
-          }
-        };
-        const { pathname } = new URL(request.url);
-        let response = null;
-        switch (true) {
-          case pathname.endsWith("/chat/completions"):
-            assert(request.method === "POST");
-            response = await handleCompletions(await request.json(), apiKey)
-              .catch(errHandler);
-          case pathname.endsWith("/embeddings"):
-            assert(request.method === "POST");
-            response = await handleEmbeddings(await request.json(), apiKey)
-              .catch(errHandler);
-          case pathname.endsWith("/models"):
-            assert(request.method === "GET");
-            response = await handleModels(apiKey)
-              .catch(errHandler);
-          default:
-            throw new HttpError("404 Not Found", 404);
-        }
-        if(response.status === 429){
-          i++;
-          continue;
-        }
-        return response;
+      };
+      const { pathname } = new URL(request.url);
+      let response = null;
+      switch (true) {
+        case pathname.endsWith("/chat/completions"):
+          assert(request.method === "POST");
+          return handleCompletions(await request.json(), apiKey)
+            .catch(errHandler);
+        case pathname.endsWith("/embeddings"):
+          assert(request.method === "POST");
+          return handleEmbeddings(await request.json(), apiKey)
+            .catch(errHandler);
+        case pathname.endsWith("/models"):
+          assert(request.method === "GET");
+          return handleModels(apiKey)
+            .catch(errHandler);
+        default:
+          throw new HttpError("404 Not Found", 404);
       }
     } catch (err) {
       return errHandler(err);
@@ -160,7 +151,7 @@ async function handleEmbeddings (req, apiKey) {
 }
 
 const DEFAULT_MODEL = "gemini-2.0-flash";
-async function handleCompletions (req, apiKey) {
+async function handleCompletions (req, apiKey, retrycnt = 3) {
   let model = DEFAULT_MODEL;
   switch (true) {
     case typeof req.model !== "string":
@@ -225,6 +216,21 @@ async function handleCompletions (req, apiKey) {
       }
       body = processCompletionsResponse(body, model, id);
     }
+  }
+  if(retrycnt>0){
+    console.log(`retry, ${retrycnt}`);
+    let retryApiKey = apiKey;
+    const API_KEYS = Netlify.env.get("API_KEYS");
+    let now = Date.now();
+    if (!API_KEYS) {
+      console.log("API_KEYS 环境变量不存在或为空。");
+    } else {
+      console.log("API_KEYS 环境变量存在，值为:", API_KEYS);
+      let apiKeys = API_KEYS.split(",");
+      retryApiKey = apiKeys[(now+i) % apiKeys.length];
+      console.log("第二个 key:", retryApiKey);
+    }
+    return handleCompletions(req, retryApiKey, retrycnt - 1)
   }
   return new Response(body, fixCors(response));
 }

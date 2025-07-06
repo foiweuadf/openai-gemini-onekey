@@ -216,6 +216,7 @@ async function handleCompletions (req, apiKey, retrycnt = 3) {
       }
       body = processCompletionsResponse(body, model, id);
     }
+    return new Response(body, fixCors(response));
   }
   if(retrycnt>0){
     console.log(`retry, ${retrycnt}`);

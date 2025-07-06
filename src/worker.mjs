@@ -151,7 +151,7 @@ async function handleEmbeddings (req, apiKey) {
 }
 
 const DEFAULT_MODEL = "gemini-2.0-flash";
-async function handleCompletions (req, apiKey, retrycnt = 3, reqbody=null) {
+async function handleCompletions (req, apiKey, retrycnt = 3) {
   let model = DEFAULT_MODEL;
   switch (true) {
     case typeof req.model !== "string":
@@ -164,19 +164,14 @@ async function handleCompletions (req, apiKey, retrycnt = 3, reqbody=null) {
     case req.model.startsWith("learnlm-"):
       model = req.model;
   }
-  let body;
-  if(reqbody!=null){
-    body = reqbody;
-  }else{
-    body = await transformRequest(req);
-  }
+  let reqbody = await transformRequest(req);
   switch (true) {
     case model.endsWith(":search"):
       model = model.substring(0, model.length - 7);
       // eslint-disable-next-line no-fallthrough
     case req.model.endsWith("-search-preview"):
-      body.tools = body.tools || [];
-      body.tools.push({googleSearch: {}});
+      reqbody.tools = reqbody.tools || [];
+      reqbody.tools.push({googleSearch: {}});
   }
   const TASK = req.stream ? "streamGenerateContent" : "generateContent";
   let url = `${BASE_URL}/${API_VERSION}/models/${model}:${TASK}`;
@@ -184,7 +179,7 @@ async function handleCompletions (req, apiKey, retrycnt = 3, reqbody=null) {
   const response = await fetch(url, {
     method: "POST",
     headers: makeHeaders(apiKey, { "Content-Type": "application/json" }),
-    body: JSON.stringify(body),
+    body: JSON.stringify(reqbody),
   });
 
   body = response.body;
@@ -236,7 +231,7 @@ async function handleCompletions (req, apiKey, retrycnt = 3, reqbody=null) {
       retryApiKey = apiKeys[now % apiKeys.length];
       console.log("第二个 key:", retryApiKey);
     }
-    return handleCompletions(req, retryApiKey, retrycnt - 1, body);
+    return handleCompletions(req, retryApiKey, retrycnt - 1);
   }
   return new Response(body, fixCors(response));
 }

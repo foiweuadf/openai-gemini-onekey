@@ -14,6 +14,7 @@ export default {
     try {
       const auth = request.headers.get("Authorization");
       let apiKey = auth?.split(" ")[1];
+      const API_KEYS = process.env.API_KEYS;
       if (!API_KEYS) {
         console.log("API_KEYS 环境变量不存在或为空。");
       } else {

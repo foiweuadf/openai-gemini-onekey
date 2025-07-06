@@ -463,10 +463,11 @@ const transformMessages = async (messages) => {
         item.role = "model";
         break;
       case "user":
+      case "model":
+      case "function":
         break;
       default:
-        break;
-        // throw new HttpError(`Unknown message role: "${item.role}"`, 400);
+        throw new HttpError(`Unknown message role: "${item.role}"`, 400);
     }
     contents.push({
       role: item.role,

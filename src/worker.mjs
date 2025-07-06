@@ -460,12 +460,13 @@ const transformMessages = async (messages) => {
         transformFnResponse(item, parts);
         continue;
       case "assistant":
-        // item.role = "model";
+        item.role = "model";
         break;
       case "user":
         break;
       default:
-        throw new HttpError(`Unknown message role: "${item.role}"`, 400);
+        break;
+        // throw new HttpError(`Unknown message role: "${item.role}"`, 400);
     }
     contents.push({
       role: item.role,

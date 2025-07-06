@@ -19,7 +19,7 @@ export default {
       } else {
         console.log("API_KEYS 环境变量存在，值为:", API_KEYS);
         let apiKeys = API_KEYS.split(",");
-        apiKey = apiKeys[(now+i) % apiKeys.length];
+        apiKey = apiKeys[now % apiKeys.length];
         console.log("第二个 key:", apiKey);
       }
       const assert = (success) => {
@@ -227,7 +227,7 @@ async function handleCompletions (req, apiKey, retrycnt = 3) {
     } else {
       console.log("API_KEYS 环境变量存在，值为:", API_KEYS);
       let apiKeys = API_KEYS.split(",");
-      retryApiKey = apiKeys[(now+i) % apiKeys.length];
+      retryApiKey = apiKeys[now % apiKeys.length];
       console.log("第二个 key:", retryApiKey);
     }
     return handleCompletions(req, retryApiKey, retrycnt - 1)

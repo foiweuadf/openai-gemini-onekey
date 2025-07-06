@@ -151,7 +151,7 @@ async function handleEmbeddings (req, apiKey) {
 }
 
 const DEFAULT_MODEL = "gemini-2.0-flash";
-async function handleCompletions (req, apiKey, retrycnt = 3) {
+async function handleCompletions (req, apiKey, retrycnt = 3, reqbody={}) {
   let model = DEFAULT_MODEL;
   switch (true) {
     case typeof req.model !== "string":
@@ -164,7 +164,9 @@ async function handleCompletions (req, apiKey, retrycnt = 3) {
     case req.model.startsWith("learnlm-"):
       model = req.model;
   }
-  let body = await transformRequest(req);
+  if(!body){
+    body = await transformRequest(req);
+  }
   switch (true) {
     case model.endsWith(":search"):
       model = model.substring(0, model.length - 7);
@@ -231,7 +233,7 @@ async function handleCompletions (req, apiKey, retrycnt = 3) {
       retryApiKey = apiKeys[now % apiKeys.length];
       console.log("第二个 key:", retryApiKey);
     }
-    return handleCompletions(req, retryApiKey, retrycnt - 1)
+    return handleCompletions(req, retryApiKey, retrycnt - 1, body);
   }
   return new Response(body, fixCors(response));
 }

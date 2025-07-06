@@ -1,7 +1,5 @@
 import { Buffer } from "node:buffer";
 
-var i = 0;
-
 export default {
   async fetch (request) {
     if (request.method === "OPTIONS") {
@@ -20,8 +18,7 @@ export default {
       } else {
         console.log("API_KEYS 环境变量存在，值为:", API_KEYS);
         let apiKeys = API_KEYS.split(",");
-        apiKey = apiKeys[i%apiKeys.length];
-        i++;
+        apiKey = apiKeys[Date.now() % apiKeys.length];
         console.log("第二个 key:", apiKey);
       }
       const assert = (success) => {

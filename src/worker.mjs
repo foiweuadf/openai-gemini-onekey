@@ -182,7 +182,7 @@ async function handleCompletions (req, apiKey, retrycnt = 3) {
     body: JSON.stringify(reqbody),
   });
 
-  body = response.body;
+  let body = response.body;
   if (response.ok) {
     let id = "chatcmpl-" + generateId(); //"chatcmpl-8pMMaqXMK68B3nyDBrapTDrhkHBQK";
     const shared = {};

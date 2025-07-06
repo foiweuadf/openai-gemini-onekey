@@ -164,7 +164,10 @@ async function handleCompletions (req, apiKey, retrycnt = 3, reqbody={}) {
     case req.model.startsWith("learnlm-"):
       model = req.model;
   }
-  if(!body){
+  let body;
+  if(reqbody){
+    body = reqbody;
+  }else{
     body = await transformRequest(req);
   }
   switch (true) {

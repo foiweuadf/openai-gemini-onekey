@@ -32,7 +32,7 @@ export default {
       switch (true) {
         case pathname.endsWith("/chat/completions"):
           assert(request.method === "POST");
-          return handleCompletions(await request.json(), apiKey)
+          return handleCompletions(await request.json(), apiKey, now=now)
             .catch(errHandler);
         case pathname.endsWith("/embeddings"):
           assert(request.method === "POST");
@@ -87,6 +87,7 @@ const makeHeaders = (apiKey, more) => ({
 });
 
 async function handleModels (apiKey) {
+  console.log("handleEmbeddings");
   const response = await fetch(`${BASE_URL}/${API_VERSION}/models`, {
     headers: makeHeaders(apiKey),
   });
@@ -108,6 +109,7 @@ async function handleModels (apiKey) {
 
 const DEFAULT_EMBEDDINGS_MODEL = "text-embedding-004";
 async function handleEmbeddings (req, apiKey) {
+  console.log("handleEmbeddings");
   if (typeof req.model !== "string") {
     throw new HttpError("model is not specified", 400);
   }
@@ -151,7 +153,7 @@ async function handleEmbeddings (req, apiKey) {
 }
 
 const DEFAULT_MODEL = "gemini-2.0-flash";
-async function handleCompletions (req, apiKey, retrycnt = 3) {
+async function handleCompletions (req, apiKey, retrycnt = 3, now = 0) {
   let model = DEFAULT_MODEL;
   switch (true) {
     case typeof req.model !== "string":
@@ -223,16 +225,15 @@ async function handleCompletions (req, apiKey, retrycnt = 3) {
     console.log(`retry, ${retrycnt}`);
     let retryApiKey = apiKey;
     const API_KEYS = Netlify.env.get("API_KEYS");
-    let now = Date.now();
     if (!API_KEYS) {
       console.log("API_KEYS 环境变量不存在或为空。");
     } else {
       console.log("API_KEYS 环境变量存在，值为:", API_KEYS);
       let apiKeys = API_KEYS.split(",");
-      retryApiKey = apiKeys[now % apiKeys.length];
+      retryApiKey = apiKeys[(now + retrycnt) % apiKeys.length];
       console.log("第二个 key:", retryApiKey);
     }
-    return handleCompletions(req, retryApiKey, retrycnt - 1);
+    return handleCompletions(req, retryApiKey, retrycnt - 1, now);
   }
   return new Response(body, fixCors(response));
 }

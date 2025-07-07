@@ -221,6 +221,10 @@ async function handleCompletions (req, apiKey, retrycnt = 3, now = 0) {
     }
     return new Response(body, fixCors(response));
   }
+  const statusCode = response.status;
+  const responseText = await response.text();
+  console.log("Status Code:", statusCode);
+  console.log("Response Text:", responseText);
   if(retrycnt>0){
     console.log(`retry, ${retrycnt}`);
     let retryApiKey = apiKey;

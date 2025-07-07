@@ -32,7 +32,7 @@ export default {
       switch (true) {
         case pathname.endsWith("/chat/completions"):
           assert(request.method === "POST");
-          return handleCompletions(await request.json(), apiKey, now=now)
+          return handleCompletions(await request.json(), apiKey, 3, now)
             .catch(errHandler);
         case pathname.endsWith("/embeddings"):
           assert(request.method === "POST");

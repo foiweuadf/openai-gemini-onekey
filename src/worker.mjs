@@ -255,10 +255,10 @@ const adjustProps = (schemaPart) => {
     if (schemaPart.type === "string" && schemaPart.format) {  
       delete schemaPart.format;
     }  
-    if (schemaPart.hasOwnProperty("allOf")){
-      schemaPart.type = schemaPart.allOf[0].type[0];
-      delete schemaPart.allOf;
-    }
+    // if (schemaPart.hasOwnProperty("allOf")){
+    //   schemaPart.type = schemaPart.allOf[0].type[0];
+    //   delete schemaPart.allOf;
+    // }
     if (schemaPart.hasOwnProperty("type") && Array.isArray(schemaPart.type)){
       schemaPart.type = schemaPart.type[0];
     }

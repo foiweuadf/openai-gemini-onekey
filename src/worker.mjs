@@ -241,19 +241,25 @@ async function handleCompletions (req, apiKey, retrycnt = 3, now = 0) {
   }
   return new Response(body, fixCors(response));
 }
-
-const adjustProps = (schemaPart) => {
-  if (typeof schemaPart !== "object" || schemaPart === null) {
-    return;
-  }
-  if (Array.isArray(schemaPart)) {
-    schemaPart.forEach(adjustProps);
-  } else {
-    if (schemaPart.type === "object" && schemaPart.properties && schemaPart.additionalProperties === false) {
-      delete schemaPart.additionalProperties;
-    }
-    Object.values(schemaPart).forEach(adjustProps);
-  }
+const adjustProps = (schemaPart) => {  
+  if (typeof schemaPart !== "object" || schemaPart === null) {  
+    return;  
+  }  
+  if (Array.isArray(schemaPart)) {  
+    schemaPart.forEach(adjustProps);  
+  } else {  
+    if (schemaPart.type === "object" && schemaPart.properties && schemaPart.additionalProperties === false) {  
+      delete schemaPart.additionalProperties;  
+    }  
+    // 添加这个新的处理逻辑  
+    if (schemaPart.type === "string" && schemaPart.format) {  
+      const supportedFormats = ["enum", "date-time"];  
+      if (!supportedFormats.includes(schemaPart.format)) {  
+        delete schemaPart.format;  
+      }  
+    }  
+    Object.values(schemaPart).forEach(adjustProps);  
+  }  
 };
 const adjustSchema = (schema) => {
   const obj = schema[schema.type];

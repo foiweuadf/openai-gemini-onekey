@@ -253,10 +253,11 @@ const adjustProps = (schemaPart) => {
     }  
     // 添加这个新的处理逻辑  
     if (schemaPart.type === "string" && schemaPart.format) {  
-      const supportedFormats = ["enum", "date-time"];  
-      if (!supportedFormats.includes(schemaPart.format)) {  
-        delete schemaPart.format;  
-      }  
+      delete schemaPart.format;
+      // const supportedFormats = ["enum", "date-time"];  
+      // if (!supportedFormats.includes(schemaPart.format)) {  
+      //   delete schemaPart.format;  
+      // }  
     }  
     Object.values(schemaPart).forEach(adjustProps);  
   }  

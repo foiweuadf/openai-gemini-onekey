@@ -266,15 +266,19 @@ async function handleCompletions (req, apiKey, retrycnt = 3, now = 0) {
 //   }  
 // };
 
-const adjustProps = (schemaPart) => {  
+
+const adjustProperties = (schemaPart) => {  
   if (typeof schemaPart !== "object" || schemaPart === null) {  
     return;  
   }  
   if (Array.isArray(schemaPart)) {  
     schemaPart.forEach(adjustProps);  
   } else {  
+    if (schemaPart.type === "object" && schemaPart.properties && schemaPart.additionalProperties === false) {  
+      delete schemaPart.additionalProperties;  
+    }  
     // 定义需要保留的字段
-    const keysToKeep = new Set(["type", "description"]);
+    const keysToKeep = new Set(["type", "description", "items"]);
     
     // 收集需要删除的字段
     const keysToDelete = [];
@@ -289,6 +293,22 @@ const adjustProps = (schemaPart) => {
       delete schemaPart[key];
     });
 
+    // 递归处理剩余字段的值，以确保嵌套结构也只保留 type, title, description
+    Object.values(schemaPart).forEach(adjustProperties);  
+  }  
+};
+
+const adjustProps = (schemaPart) => {  
+  if (typeof schemaPart !== "object" || schemaPart === null) {  
+    return;  
+  }  
+  if (Array.isArray(schemaPart)) {  
+    schemaPart.forEach(adjustProps);  
+  } else {  
+    if (schemaPart.type === "object" && schemaPart.properties && schemaPart.additionalProperties === false) {  
+      delete schemaPart.additionalProperties;  
+      adjustProperties(schemaPart.properties)
+    }  
     // 递归处理剩余字段的值，以确保嵌套结构也只保留 type, title, description
     Object.values(schemaPart).forEach(adjustProps);  
   }  

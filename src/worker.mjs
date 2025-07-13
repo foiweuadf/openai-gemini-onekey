@@ -185,7 +185,7 @@ async function handleCompletions (req, apiKey, retrycnt = 3, now = 0) {
     body: JSON.stringify(reqbody),
   });
 
-  let body = response.body;
+  let body;
   if (response.ok) {
     let id = "chatcmpl-" + generateId(); //"chatcmpl-8pMMaqXMK68B3nyDBrapTDrhkHBQK";
     const shared = {};
@@ -222,9 +222,9 @@ async function handleCompletions (req, apiKey, retrycnt = 3, now = 0) {
     return new Response(body, fixCors(response));
   }
   const statusCode = response.status;
-  const responseText = await response.text();
   console.log("Status Code:", statusCode);
-  console.log("Response Text:", responseText);
+  // const responseText = await response.text();
+  // console.log("Response Text:", responseText);
   if(retrycnt>0){
     console.log(`retry, ${retrycnt}`);
     let retryApiKey = apiKey;
@@ -255,10 +255,10 @@ const adjustProps = (schemaPart) => {
     if (schemaPart.type === "string" && schemaPart.format) {  
       delete schemaPart.format;
     }  
-    // if (schemaPart.hasOwnProperty("allOf")){
-    //   schemaPart.type = schemaPart.allOf[0].type[0];
-    //   delete schemaPart.allOf;
-    // }
+    if (schemaPart.hasOwnProperty("allOf")){
+      schemaPart.type = schemaPart.allOf[0].type[0];
+      delete schemaPart.allOf;
+    }
     if (schemaPart.hasOwnProperty("type") && Array.isArray(schemaPart.type)){
       schemaPart.type = schemaPart.type[0];
     }

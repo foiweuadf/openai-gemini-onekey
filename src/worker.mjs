@@ -254,11 +254,11 @@ const adjustProps = (schemaPart) => {
     // 添加这个新的处理逻辑  
     if (schemaPart.type === "string" && schemaPart.format) {  
       delete schemaPart.format;
-      // const supportedFormats = ["enum", "date-time"];  
-      // if (!supportedFormats.includes(schemaPart.format)) {  
-      //   delete schemaPart.format;  
-      // }  
     }  
+    if (schemaPart.hasOwnProperty("allOf")){
+      schemaPart.type = schemaPart.allOf[0].type[0];
+      delete schemaPart.allOf;
+    }
     Object.values(schemaPart).forEach(adjustProps);  
   }  
 };

@@ -220,11 +220,11 @@ async function handleCompletions (req, apiKey, retrycnt = 3, now = 0) {
       body = processCompletionsResponse(body, model, id);
     }
     return new Response(body, fixCors(response));
-  }
+  } 
   const statusCode = response.status;
   console.log("Status Code:", statusCode);
-  // const responseText = await response.text();
-  // console.log("Response Text:", responseText);
+  const responseText = await response.text();
+  console.log("Response Text:", responseText);
   if(retrycnt>0){
     console.log(`retry, ${retrycnt}`);
     let retryApiKey = apiKey;
@@ -239,7 +239,7 @@ async function handleCompletions (req, apiKey, retrycnt = 3, now = 0) {
     }
     return handleCompletions(req, retryApiKey, retrycnt - 1, now);
   }
-  return new Response(body, fixCors(response));
+  return new Response(responseText, fixCors(response));
 }
 const adjustProps = (schemaPart) => {  
   if (typeof schemaPart !== "object" || schemaPart === null) {  

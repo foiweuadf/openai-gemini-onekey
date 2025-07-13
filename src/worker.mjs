@@ -272,7 +272,7 @@ const adjustProperties = (schemaPart) => {
     return;  
   }  
   if (Array.isArray(schemaPart)) {  
-    schemaPart.forEach(adjustProps);  
+    schemaPart.forEach(adjustProperties);  
   } else {  
     if (schemaPart.type === "object" && schemaPart.properties && schemaPart.additionalProperties === false) {  
       delete schemaPart.additionalProperties;  
@@ -305,9 +305,11 @@ const adjustProps = (schemaPart) => {
   if (Array.isArray(schemaPart)) {  
     schemaPart.forEach(adjustProps);  
   } else {  
-    if (schemaPart.type === "object" && schemaPart.properties && schemaPart.additionalProperties === false) {  
-      delete schemaPart.additionalProperties;  
-      adjustProperties(schemaPart.properties)
+    if (schemaPart.type === "object" && schemaPart.properties) {  
+      if(schemaPart.hasOwnProperty("additionalProperties")){
+        delete schemaPart.additionalProperties;  
+      }
+      Object.values(schemaPart.properties).forEach(adjustProperties);  
     }  
     // 递归处理剩余字段的值，以确保嵌套结构也只保留 type, title, description
     Object.values(schemaPart).forEach(adjustProps);  
@@ -553,6 +555,7 @@ const transformTools = (req) => {
   if (req.tools) {
     const funcs = req.tools.filter(tool => tool.type === "function");
     funcs.forEach(adjustSchema);
+    console.log(funcs)
     tools = [{ function_declarations: funcs.map(schema => schema.function) }];
   }
   if (req.tool_choice) {

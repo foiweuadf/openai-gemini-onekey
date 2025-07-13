@@ -259,6 +259,9 @@ const adjustProps = (schemaPart) => {
       schemaPart.type = schemaPart.allOf[0].type[0];
       delete schemaPart.allOf;
     }
+    if (schemaPart.hasOwnProperty("type") && Array.isArray(schemaPart.type)){
+      schemaPart.type = schemaPart.type[0];
+    }
     Object.values(schemaPart).forEach(adjustProps);  
   }  
 };

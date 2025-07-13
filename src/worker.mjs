@@ -358,6 +358,7 @@ const transformFnResponse = ({ content, tool_call_id }, parts) => {
   }
   let response;
   try {
+    console.log(`func: ${content}`);
     response = JSON.parse(content);
   } catch (err) {
     console.error("Error parsing function response content:", err);

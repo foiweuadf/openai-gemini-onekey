@@ -12,16 +12,7 @@ export default {
     try {
       const auth = request.headers.get("Authorization");
       let apiKey = auth?.split(" ")[1];
-      const API_KEYS = Netlify.env.get("API_KEYS");
       let now = Date.now();
-      if (!API_KEYS) {
-        console.log("API_KEYS 环境变量不存在或为空。");
-      } else {
-        console.log("API_KEYS 环境变量存在，值为:", API_KEYS);
-        let apiKeys = API_KEYS.split(",");
-        apiKey = apiKeys[now % apiKeys.length];
-        console.log("第二个 key:", apiKey);
-      }
       const assert = (success) => {
         if (!success) {
           throw new HttpError("The specified HTTP method is not allowed for the requested resource", 400);

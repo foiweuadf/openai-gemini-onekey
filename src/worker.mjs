@@ -219,15 +219,6 @@ async function handleCompletions (req, apiKey, retrycnt = 3, now = 0) {
   if(retrycnt>0){
     console.log(`retry, ${retrycnt}`);
     let retryApiKey = apiKey;
-    const API_KEYS = Netlify.env.get("API_KEYS");
-    if (!API_KEYS) {
-      console.log("API_KEYS 环境变量不存在或为空。");
-    } else {
-      console.log("API_KEYS 环境变量存在，值为:", API_KEYS);
-      let apiKeys = API_KEYS.split(",");
-      retryApiKey = apiKeys[(now + retrycnt) % apiKeys.length];
-      console.log("第二个 key:", retryApiKey);
-    }
     return handleCompletions(req, retryApiKey, retrycnt - 1, now);
   }
   return new Response(responseText, fixCors(response));
